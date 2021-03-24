@@ -2,13 +2,14 @@ package product
 
 import (
 	"encoding/json"
+	"github.com/go-chi/chi"
 	"io/ioutil"
 	"net/http"
 	prod "github.com/deniarianto1606/go-store/product"
 )
 
 type ProductHandler interface {
-	//Get(w http.ResponseWriter, r *http.Request)
+	FindByCode(w http.ResponseWriter, r *http.Request)
 	CreateProduct(w http.ResponseWriter, r *http.Request)
 }
 
@@ -25,6 +26,17 @@ func (p *handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	ParseBody(r, product)
 	b:= p.productService.Save(product)
 	res,_ := json.Marshal(b)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func (p *handler) FindByCode(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "code")
+	product, err := p.productService.FindByCode(code)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+	}
+	res,_ := json.Marshal(product)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }

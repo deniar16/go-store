@@ -12,7 +12,7 @@ import (
 	"github.com/deniarianto1606/go-store/product"
 )
 
-type mongoRepository struct {
+type MongoRepository struct {
 	client *mongo.Client
 	database string
 	timeout time.Duration
@@ -33,7 +33,7 @@ func newMongoClient(mongoUrl string, mongoTimeout int) (*mongo.Client, error){
 }
 
 func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (product.ProductRepository, error)  {
-	repo := &mongoRepository{
+	repo := &MongoRepository{
 		timeout: time.Duration(mongoTimeout) * time.Second,
 		database: mongoDb,
 	}
@@ -45,7 +45,7 @@ func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (product.Pro
 	return repo, nil
 }
 
-func (r *mongoRepository) FindByCode(code string) (*product.Product, error) {
+func (r *MongoRepository) FindByCode(code string) (*product.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 	redirect := &product.Product{}
@@ -61,7 +61,7 @@ func (r *mongoRepository) FindByCode(code string) (*product.Product, error) {
 	return redirect, nil
 }
 
-func (r *mongoRepository) Save(product *product.Product) error  {
+func (r *MongoRepository) Save(product *product.Product) error  {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 	collection := r.client.Database(r.database).Collection("product")

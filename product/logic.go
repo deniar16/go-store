@@ -12,17 +12,17 @@ var (
 )
 
 type productService struct {
-	productRepository ProductRepository
+	productGateway Gateway
 }
 
-func NewProductService(productRepository ProductRepository) ProductService {
+func NewProductService(productGateway Gateway) ProductService {
 	return &productService{
-		productRepository: productRepository,
+		productGateway: productGateway,
 	}
 }
 
 func (p *productService) FindByCode(code string) (*Product, error)  {
-	return p.productRepository.FindByCode(code)
+	return p.productGateway.FindByCode(code)
 }
 
 func (p *productService) Save(product *Product) error {
@@ -31,5 +31,5 @@ func (p *productService) Save(product *Product) error {
 	}
 
 	product.CreatedAt = time.Now().UTC().Unix()
-	return p.productRepository.Save(product)
+	return p.productGateway.Save(product)
 }

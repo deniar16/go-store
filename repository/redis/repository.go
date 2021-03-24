@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-type redisRepository struct {
+type RedisRepository struct {
 	client *redis.Client
 }
 
@@ -23,7 +23,7 @@ func newRedisClient(redisUrl string) (*redis.Client, error){
 }
 
 func NewRedisRepository(redisUrl string) (product.ProductRepository, error)  {
-	repo := &redisRepository{}
+	repo := &RedisRepository{}
 	client, err := newRedisClient(redisUrl)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.NewRedisRepository")
@@ -32,10 +32,10 @@ func NewRedisRepository(redisUrl string) (product.ProductRepository, error)  {
 	return repo, nil
 }
 
-func (r *redisRepository) generateKey(code string) string  {
+func (r *RedisRepository) generateKey(code string) string  {
 	return fmt.Sprintf("redirect:%s", code)
 }
-func (r *redisRepository) FindByCode(code string) (*product.Product, error) {
+func (r *RedisRepository) FindByCode(code string) (*product.Product, error) {
 	redirect := &product.Product{}
 	key := r.generateKey(code)
 	data, err := r.client.HGetAll(key).Result()
@@ -56,7 +56,7 @@ func (r *redisRepository) FindByCode(code string) (*product.Product, error) {
 	return redirect, nil
 }
 
-func (r *redisRepository) Save(redirect *product.Product) error  {
+func (r *RedisRepository) Save(redirect *product.Product) error  {
 	key := r.generateKey(redirect.Code)
 	data := map[string]interface{}{
 		"code":       redirect.Code,

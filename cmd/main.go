@@ -2,22 +2,24 @@ package main
 
 import (
 	"fmt"
+	c "github.com/deniarianto1606/go-store/controller/product"
 	"github.com/deniarianto1606/go-store/product"
+	m "github.com/deniarianto1606/go-store/repository/mongo/product"
+	"github.com/deniarianto1606/go-store/repository/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log"
 	"net/http"
 	"os"
-	m "github.com/deniarianto1606/go-store/repository/mongo/product"
-	c "github.com/deniarianto1606/go-store/controller/product"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
 
-	repo := chooseRepo()
-	service := product.NewProductService(repo)
+	repoMongo := repoMongo()
+	repoRedis := repoRedis()
+	service := product.NewProductService(product.NewProductGateway(repoRedis, repoMongo))
 	handler := c.NewHandler(service)
 
 	r := chi.NewRouter()
@@ -26,7 +28,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	//r.Get("/{code}", handler.Get)
+	r.Get("/{code}", handler.FindByCode)
 	r.Post("/", handler.CreateProduct)
 
 	errs := make(chan error, 2)
@@ -52,12 +54,23 @@ func httpPort() string {
 }
 
 
-func chooseRepo() product.ProductRepository {
+func repoMongo() product.ProductRepository {
+
 	log.Printf("get mongodb")
 	mongoUrl := "mongodb://localhost/" //os.Getenv("MONGO_URL")
 	mongodb := "go-store" //os.Getenv("MONGO_DB")
 	mongoTimeout := 30 //strconv.Atoi(os.Getenv("MONGO_TIMEOUT"))
 	repo, err := m.NewMongoRepository(mongoUrl, mongodb, mongoTimeout)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return repo
+}
+
+func repoRedis() product.ProductRepository {
+	log.Printf("get mongodb")
+	redisUrl := "redis://localhost:6379" //os.Getenv("MONGO_URL")
+	repo, err := redis.NewRedisRepository(redisUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
