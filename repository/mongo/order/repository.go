@@ -1,11 +1,11 @@
-package product
+package order
 
 
 import (
 	"context"
-	"github.com/deniarianto1606/go-store/product/domain"
-	"github.com/deniarianto1606/go-store/product/ports"
-	"github.com/deniarianto1606/go-store/product/service"
+	"github.com/deniarianto1606/go-store/order/domain"
+	"github.com/deniarianto1606/go-store/order/ports"
+	"github.com/deniarianto1606/go-store/order/service"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,7 +34,7 @@ func newMongoClient(mongoUrl string, mongoTimeout int) (*mongo.Client, error){
 	return client, nil
 }
 
-func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (ports.ProductRepository, error)  {
+func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (ports.OrderRepository, error)  {
 	repo := &MongoRepository{
 		timeout: time.Duration(mongoTimeout) * time.Second,
 		database: mongoDb,
@@ -47,33 +47,33 @@ func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (ports.Produ
 	return repo, nil
 }
 
-func (r *MongoRepository) FindByCode(code string) (*domain.Product, error) {
+func (r *MongoRepository) FindByCode(code string) (*domain.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
-	redirect := &domain.Product{}
-	collection := r.client.Database(r.database).Collection("product")
+	redirect := &domain.Order{}
+	collection := r.client.Database(r.database).Collection("order")
 	filter := bson.M{"code": code}
 	err := collection.FindOne(ctx, filter).Decode(&redirect)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.Wrap(service.ErrProductInvalid, "notFound.ErrNoDocument")
+			return nil, errors.Wrap(service.ErrOrderNotFound, "notFound.ErrNoDocument")
 		}
-		return nil, errors.Wrap(err, "repository.Product.FindError")
+		return nil, errors.Wrap(err, "repository.Order.FindError")
 	}
 	return redirect, nil
 }
 
-func (r *MongoRepository) Save(product *domain.Product) error  {
+func (r *MongoRepository) Save(order *domain.Order) error  {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
-	collection := r.client.Database(r.database).Collection("product")
+	collection := r.client.Database(r.database).Collection("order")
 	_, err:= collection.InsertOne(
 		ctx,
 		bson.M{
-			"code": product.Code,
-			"name": product.Name,
-			"desc": product.Desc,
-			"created_at": product.CreatedAt,
+			"price_total": order.PriceTotal,
+			"code": order.Code,
+			"product_code": order.ProductCode,
+			"created_at": order.CreatedAt,
 		},
 	)
 	if err != nil {

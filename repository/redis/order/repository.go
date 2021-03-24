@@ -1,8 +1,10 @@
-package redis
+package order
 
 import (
 	"fmt"
-	"github.com/deniarianto1606/go-store/product"
+	"github.com/deniarianto1606/go-store/order/domain"
+	"github.com/deniarianto1606/go-store/order/ports"
+	"github.com/deniarianto1606/go-store/order/service"
 	"github.com/go-redis/redis"
 	"github.com/pkg/errors"
 	"strconv"
@@ -22,7 +24,7 @@ func newRedisClient(redisUrl string) (*redis.Client, error){
 	return client, err
 }
 
-func NewRedisRepository(redisUrl string) (product.ProductRepository, error)  {
+func NewRedisRepository(redisUrl string) (ports.OrderRepository, error)  {
 	repo := &RedisRepository{}
 	client, err := newRedisClient(redisUrl)
 	if err != nil {
@@ -33,36 +35,36 @@ func NewRedisRepository(redisUrl string) (product.ProductRepository, error)  {
 }
 
 func (r *RedisRepository) generateKey(code string) string  {
-	return fmt.Sprintf("redirect:%s", code)
+	return fmt.Sprintf("order:%s", code)
 }
-func (r *RedisRepository) FindByCode(code string) (*product.Product, error) {
-	redirect := &product.Product{}
+func (r *RedisRepository) FindByCode(code string) (*domain.Order, error) {
+	order := &domain.Order{}
 	key := r.generateKey(code)
 	data, err := r.client.HGetAll(key).Result()
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.Redirect.Find")
 	}
 	if len(data) == 0 {
-		return nil, errors.Wrap(product.ErrProductNotFound, "repository.Redirect.FindNotFound")
+		return nil, errors.Wrap(service.ErrProductNotFound, "repository.Redirect.FindNotFound")
 	}
 	createdAt, err := strconv.ParseInt(data["created_at"], 10, 64)
 	if err != nil {
-		return nil, errors.Wrap(product.ErrProductInvalid, "repository.Redirect.FindErrorParse")
+		return nil, errors.Wrap(service.ErrOrderNotFound, "repository.Redirect.FindErrorParse")
 	}
-	redirect.Code = data["code"]
-	redirect.Name = data["name"]
-	redirect.Desc = data["desc"]
-	redirect.CreatedAt = createdAt
-	return redirect, nil
+	order.ProductCode = data["product_code"]
+	order.Code = data["code"]
+	order.PriceTotal, _ = strconv.ParseInt(data["price_total"], 10, 64)
+	order.CreatedAt = createdAt
+	return order, nil
 }
 
-func (r *RedisRepository) Save(redirect *product.Product) error  {
-	key := r.generateKey(redirect.Code)
+func (r *RedisRepository) Save(order *domain.Order) error  {
+	key := r.generateKey(order.Code)
 	data := map[string]interface{}{
-		"code":       redirect.Code,
-		"name":        redirect.Name,
-		"desc":        redirect.Desc,
-		"created_at": redirect.CreatedAt,
+		"product_code":       order.ProductCode,
+		"code":        order.Code,
+		"price_total":        order.PriceTotal,
+		"created_at": order.CreatedAt,
 	}
 	_, err := r.client.HMSet(key, data).Result()
 	if err != nil {

@@ -1,6 +1,9 @@
-package product
+package service
 
 import (
+	"github.com/deniarianto1606/go-store/gateway/product"
+	"github.com/deniarianto1606/go-store/product/domain"
+	"github.com/deniarianto1606/go-store/product/ports"
 	"github.com/pkg/errors"
 	"gopkg.in/dealancer/validate.v2"
 	"time"
@@ -12,20 +15,20 @@ var (
 )
 
 type productService struct {
-	productGateway Gateway
+	productGateway product.Gateway
 }
 
-func NewProductService(productGateway Gateway) ProductService {
+func NewProductService(productGateway product.Gateway) ports.ProductService {
 	return &productService{
 		productGateway: productGateway,
 	}
 }
 
-func (p *productService) FindByCode(code string) (*Product, error)  {
+func (p *productService) FindByCode(code string) (*domain.Product, error)  {
 	return p.productGateway.FindByCode(code)
 }
 
-func (p *productService) Save(product *Product) error {
+func (p *productService) Save(product *domain.Product) error {
 	if err := validate.Validate(product); err != nil {
 		return errors.Wrap(ErrProductNotFound, "service.Product.NotFound")
 	}
