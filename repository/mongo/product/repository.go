@@ -1,6 +1,5 @@
 package product
 
-
 import (
 	"context"
 	"github.com/deniarianto1606/go-store/product/domain"
@@ -15,12 +14,13 @@ import (
 )
 
 type MongoRepository struct {
-	client *mongo.Client
+	client   *mongo.Client
 	database string
-	timeout time.Duration
+	timeout  time.Duration
+	DB       *mongo.Database
 }
 
-func newMongoClient(mongoUrl string, mongoTimeout int) (*mongo.Client, error){
+func newMongoClient(mongoUrl string, mongoTimeout int) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(mongoTimeout)*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoUrl))
@@ -34,10 +34,11 @@ func newMongoClient(mongoUrl string, mongoTimeout int) (*mongo.Client, error){
 	return client, nil
 }
 
-func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int) (ports.ProductRepository, error)  {
+func NewMongoRepository(mongoUrl, mongoDb string, mongoTimeout int, mongoDB *mongo.Database) (ports.ProductRepository, error) {
 	repo := &MongoRepository{
-		timeout: time.Duration(mongoTimeout) * time.Second,
+		timeout:  time.Duration(mongoTimeout) * time.Second,
 		database: mongoDb,
+		DB:       mongoDB,
 	}
 	client, err := newMongoClient(mongoUrl, mongoTimeout)
 	if err != nil {
@@ -51,7 +52,8 @@ func (r *MongoRepository) FindByCode(code string) (*domain.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 	redirect := &domain.Product{}
-	collection := r.client.Database(r.database).Collection("product")
+	//collection := r.client.Database(r.database).Collection("product")
+	collection := r.DB.Collection("product")
 	filter := bson.M{"code": code}
 	err := collection.FindOne(ctx, filter).Decode(&redirect)
 	if err != nil {
@@ -63,16 +65,16 @@ func (r *MongoRepository) FindByCode(code string) (*domain.Product, error) {
 	return redirect, nil
 }
 
-func (r *MongoRepository) Save(product *domain.Product) error  {
+func (r *MongoRepository) Save(product *domain.Product) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 	collection := r.client.Database(r.database).Collection("product")
-	_, err:= collection.InsertOne(
+	_, err := collection.InsertOne(
 		ctx,
 		bson.M{
-			"code": product.Code,
-			"name": product.Name,
-			"desc": product.Desc,
+			"code":       product.Code,
+			"name":       product.Name,
+			"desc":       product.Desc,
 			"created_at": product.CreatedAt,
 		},
 	)
