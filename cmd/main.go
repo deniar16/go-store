@@ -6,6 +6,7 @@ import (
 	po "github.com/deniarianto1606/go-store/order/ports"
 	pp "github.com/deniarianto1606/go-store/product/ports"
 	"github.com/deniarianto1606/go-store/product/ports/findbycode"
+	"github.com/deniarianto1606/go-store/product/ports/save"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"os"
@@ -26,7 +27,7 @@ type appDB struct {
 
 type appUseCase struct {
 	findByCode findbycode.UseCase
-	service    pp.ProductService
+	save       save.UseCase
 }
 
 type appGateway struct {

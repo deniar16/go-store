@@ -2,8 +2,8 @@ package main
 
 import (
 	productGateway "github.com/deniarianto1606/go-store/gateway/product"
-	serviceProduct "github.com/deniarianto1606/go-store/product/service"
 	"github.com/deniarianto1606/go-store/product/service/findbycode"
+	"github.com/deniarianto1606/go-store/product/service/save"
 )
 
 func initializeGateway(repo *appRepo, gw *appGateway) {
@@ -12,8 +12,8 @@ func initializeGateway(repo *appRepo, gw *appGateway) {
 }
 
 func initializeUseCase(gw *appGateway, uc *appUseCase) {
-	service := serviceProduct.NewProductService(gw.product)
 	productFindByCodeUseCase := findbycode.NewUseCase(gw.product)
+	productSaveUseCase := save.NewUseCase(gw.product)
 	uc.findByCode = productFindByCodeUseCase
-	uc.service = service
+	uc.save = productSaveUseCase
 }

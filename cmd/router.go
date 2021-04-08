@@ -10,10 +10,10 @@ import (
 )
 
 func initializeRouter(uc *appUseCase, repo *appRepo) *chi.Mux {
-	handler := product.NewHandler(uc.service, uc.findByCode)
-	serviceOrder := serviceOrder.NewOrderService(orderGateway.NewOrderGateway(repo.productMongo, repo.productMongo,
+	handler := product.NewHandler(uc.findByCode, uc.save)
+	so := serviceOrder.NewOrderService(orderGateway.NewOrderGateway(repo.productMongo, repo.productMongo,
 		repo.orderRedis, repo.orderMongo))
-	handlerOrder := order.NewHandler(serviceOrder)
+	handlerOrder := order.NewHandler(so)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
