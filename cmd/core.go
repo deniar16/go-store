@@ -7,8 +7,7 @@ import (
 )
 
 func initializeGateway(repo *appRepo, gw *appGateway) {
-	productGw := productGateway.NewProductGateway(repo.productRedis, repo.productMongo)
-	gw.product = productGw
+	gw.product = productGateway.NewProductGateway(repo.productRedis, repo.productMongo)
 }
 
 func initializeUseCase(gw *appGateway, uc *appUseCase) {

@@ -10,11 +10,18 @@ import (
 	"strconv"
 )
 
+const (
+	code      = "code"
+	name      = "name"
+	desc      = "desc"
+	createdAt = "created_at"
+)
+
 type RedisRepository struct {
 	client *redis.Client
 }
 
-func newRedisClient(redisUrl string) (*redis.Client, error){
+func newRedisClient(redisUrl string) (*redis.Client, error) {
 	opts, err := redis.ParseURL(redisUrl)
 	if err != nil {
 		return nil, err
@@ -24,7 +31,7 @@ func newRedisClient(redisUrl string) (*redis.Client, error){
 	return client, err
 }
 
-func NewRedisRepository(redisUrl string) (ports.ProductRepository, error)  {
+func NewRedisRepository(redisUrl string) (ports.ProductRepository, error) {
 	repo := &RedisRepository{}
 	client, err := newRedisClient(redisUrl)
 	if err != nil {
@@ -34,12 +41,12 @@ func NewRedisRepository(redisUrl string) (ports.ProductRepository, error)  {
 	return repo, nil
 }
 
-func (r *RedisRepository) generateKey(code string) string  {
+func (r *RedisRepository) generateKey(code string) string {
 	return fmt.Sprintf("redirect:%s", code)
 }
-func (r *RedisRepository) FindByCode(code string) (*domain.Product, error) {
+func (r *RedisRepository) FindByCode(cd string) (*domain.Product, error) {
 	redirect := &domain.Product{}
-	key := r.generateKey(code)
+	key := r.generateKey(cd)
 	data, err := r.client.HGetAll(key).Result()
 	if err != nil {
 		return nil, errors.Wrap(err, "repository.Redirect.Find")
@@ -47,24 +54,24 @@ func (r *RedisRepository) FindByCode(code string) (*domain.Product, error) {
 	if len(data) == 0 {
 		return nil, errors.Wrap(service.ErrProductNotFound, "repository.Redirect.FindNotFound")
 	}
-	createdAt, err := strconv.ParseInt(data["created_at"], 10, 64)
+	createdAt, err := strconv.ParseInt(data[createdAt], 10, 64)
 	if err != nil {
 		return nil, errors.Wrap(service.ErrProductInvalid, "repository.Redirect.FindErrorParse")
 	}
-	redirect.Code = data["code"]
-	redirect.Name = data["name"]
-	redirect.Desc = data["desc"]
+	redirect.Code = data[code]
+	redirect.Name = data[name]
+	redirect.Desc = data[desc]
 	redirect.CreatedAt = createdAt
 	return redirect, nil
 }
 
-func (r *RedisRepository) Save(redirect *domain.Product) error  {
+func (r *RedisRepository) Save(redirect *domain.Product) error {
 	key := r.generateKey(redirect.Code)
 	data := map[string]interface{}{
-		"code":       redirect.Code,
-		"name":        redirect.Name,
-		"desc":        redirect.Desc,
-		"created_at": redirect.CreatedAt,
+		code:      redirect.Code,
+		name:      redirect.Name,
+		desc:      redirect.Desc,
+		createdAt: redirect.CreatedAt,
 	}
 	_, err := r.client.HMSet(key, data).Result()
 	if err != nil {
