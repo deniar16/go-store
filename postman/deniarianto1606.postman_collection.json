@@ -1,0 +1,120 @@
+{
+	"info": {
+		"_postman_id": "6b8208c5-59e9-4044-8580-dd6967489cba",
+		"name": "deniarianto1606",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "go-store",
+			"item": [
+				{
+					"name": "product",
+					"item": [
+						{
+							"name": "/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:50001/product/123",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "50001",
+									"path": [
+										"product",
+										"123"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"123\",\n    \"name\": \"name\",\n    \"desc\": \"desc\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:50001/product",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "50001",
+									"path": [
+										"product"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "order",
+					"item": [
+						{
+							"name": "/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:50001/order/O123",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "50001",
+									"path": [
+										"order",
+										"O123"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"pricetotal\": 10000,\n    \"code\": \"O123\",\n    \"productcode\": \"123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:50001/order",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "50001",
+									"path": [
+										"order"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

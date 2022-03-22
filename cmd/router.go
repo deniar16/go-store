@@ -26,8 +26,8 @@ func initializeRouter(uc *appUseCase, repo *appRepo) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/{code}", productHandler.FindByCode)
-	r.Post("/", productHandler.CreateProduct)
+	r.Get("/product/{code}", productHandler.FindByCode)
+	r.Post("/product/", productHandler.CreateProduct)
 	r.Get("/order/{code}", orderHandler.FindByCode)
 	r.Post("/order", orderHandler.CreateOrder)
 
